@@ -36,7 +36,14 @@ public class MetroDeParisController {
 
     @FXML
     void findPath(ActionEvent event) {
-
+    	
+    	if(choisPart.getValue() != null && choisArrive.getValue() != null)
+    		if(choisPart.getValue() != choisArrive.getValue() )
+    			txtResult.setText(model.calcolaPercorso(choisPart.getValue(), choisArrive.getValue()));
+    		else
+    			txtResult.setText("La fermata di Partenza deve essere diversa da quella di Arrivo!");
+    	else
+    		txtResult.setText("Inserire la fermata di Partenza/Arrivo!");
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
