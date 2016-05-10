@@ -14,6 +14,10 @@ public class Fermata {
 		this.coordX = coordX;
 		this.coordY = coordY;
 	}
+	
+	public Fermata(int id_fermata) {
+		this.id_fermata = id_fermata;
+	}
 
 	public int getId_fermata() {
 		return id_fermata;

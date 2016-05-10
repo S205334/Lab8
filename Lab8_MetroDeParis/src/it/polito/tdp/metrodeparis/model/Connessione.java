@@ -3,22 +3,23 @@ package it.polito.tdp.metrodeparis.model;
 public class Connessione {
 
 	private int id_conn;
-	private int id_linea;
-	private int id_StazP;
-	private int id_StazA;
+	private Linea linea;
+	private Fermata stazP;
+	private Fermata stazA;
 	
-	public Connessione(int id_conn, int id_linea, int id_StazP, int id_StazA) {
+	public Connessione(int id_conn, Linea id_linea, Fermata id_StazP, Fermata id_StazA) {
 		super();
 		this.id_conn = id_conn;
-		this.id_linea = id_linea;
-		this.id_StazP = id_StazP;
-		this.id_StazA = id_StazA;
+		this.linea = id_linea;
+		this.stazP = id_StazP;
+		this.stazA = id_StazA;
 	}
-	
-	
+
+
 	public int getId_conn() {
 		return id_conn;
 	}
+
 
 
 	public void setId_conn(int id_conn) {
@@ -26,34 +27,41 @@ public class Connessione {
 	}
 
 
-	public int getId_linea() {
-		return id_linea;
+
+	public Linea getLinea() {
+		return linea;
 	}
 
 
-	public void setId_linea(int id_linea) {
-		this.id_linea = id_linea;
+
+	public void setLinea(Linea linea) {
+		this.linea = linea;
 	}
 
 
-	public int getId_StazP() {
-		return id_StazP;
+
+	public Fermata getStazP() {
+		return stazP;
 	}
 
 
-	public void setId_StazP(int id_StazP) {
-		this.id_StazP = id_StazP;
+
+	public void setStazP(Fermata stazP) {
+		this.stazP = stazP;
 	}
 
 
-	public int getId_StazA() {
-		return id_StazA;
+
+	public Fermata getStazA() {
+		return stazA;
 	}
 
 
-	public void setId_StazA(int id_StazA) {
-		this.id_StazA = id_StazA;
+
+	public void setStazA(Fermata stazA) {
+		this.stazA = stazA;
 	}
+
 
 
 	@Override

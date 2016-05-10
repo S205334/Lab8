@@ -17,6 +17,10 @@ public class Linea {
 		this.colore = colore;
 	}
 
+	public Linea(int id_linea) {
+		this.id_linea = id_linea;
+	}
+	
 	public int getId_linea() {
 		return id_linea;
 	}

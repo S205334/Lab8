@@ -76,7 +76,7 @@ public class MetroDAO {
 		return null;
 	}
 	
-	public List<Connessione> getListConn() {
+	public List<Connessione> getListConn(List<Fermata> f, List<Linea> l) {
 		List<Connessione> connessioni = new ArrayList<>();
 		String sql = "SELECT* "
 				+ "FROM connessione";
@@ -88,10 +88,15 @@ public class MetroDAO {
 			ResultSet res = st.executeQuery(sql);
 			
 			while(res.next()) {
-				connessioni.add(new Connessione (res.getInt("id_connessione"),
-						res.getInt("id_linea"),
-						res.getInt("id_StazP"),
-						res.getInt("id_StazA")));
+				int idLinea = res.getInt("id_linea");
+				int idStazP = res.getInt("id_stazP");
+				int idStazA = res.getInt("id_stazA");
+				
+				Linea linea = l.get(l.indexOf(new Linea(idLinea)));
+				Fermata stazP = f.get(f.indexOf(new Fermata(idStazP)));
+				Fermata stazA = f.get(f.indexOf(new Fermata(idStazA)));
+				
+				connessioni.add(new Connessione (res.getInt("id_connessione"), linea, stazP, stazA));
 			}
 			
 			st.close();

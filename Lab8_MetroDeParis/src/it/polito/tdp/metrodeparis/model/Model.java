@@ -7,7 +7,7 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.WeightedMultigraph;
+import org.jgrapht.graph.DirectedWeightedMultigraph;
 
 import com.javadocmd.simplelatlng.LatLng;
 import com.javadocmd.simplelatlng.LatLngTool;
@@ -20,32 +20,57 @@ public class Model {
 	private List<Fermata> fermate;
 	private List<Linea> linee;
 	private List<Connessione> conn;
-	private WeightedMultigraph<Fermata, DefaultWeightedEdge> graph;
+	private List<FermataSuLinea> ferLinee;
+	private DirectedWeightedMultigraph<FermataSuLinea, DefaultWeightedEdge> graph;
 	private MetroDAO dao;
 	
 	public Model() {
 		this.dao = new MetroDAO();
+		this.ferLinee = new ArrayList<>();
 		this.fermate = dao.getListFermata();
 		
 		generaGrafo();
 	}
 	
-	public String calcolaPercorso(String p, String a) {
-		StringBuilder result = new StringBuilder();
-		DijkstraShortestPath<Fermata, DefaultWeightedEdge> dijkstra =
-				new DijkstraShortestPath<Fermata, DefaultWeightedEdge>(graph, findFermataByNome(p), findFermataByNome(a)) ;
+	public DijkstraShortestPath<FermataSuLinea, DefaultWeightedEdge> findPath(String p, String a) {
+		DijkstraShortestPath<FermataSuLinea, DefaultWeightedEdge> dijkstra;
 		
-		GraphPath<Fermata, DefaultWeightedEdge> path = dijkstra.getPath() ;
+		for(FermataSuLinea fp : findFermataByNome(p)) {
+			for(FermataSuLinea fa : findFermataByNome(a)) {
+				dijkstra = new DijkstraShortestPath<FermataSuLinea, DefaultWeightedEdge>(graph, fp, fa) ;
+							
+				if (dijkstra.getPath() !=null)
+					return dijkstra;
+			}
+		}
+		
+		return null;
+	}
+	
+	public String calcolaPercorso(String p, String a) {
+		
+		StringBuilder result = new StringBuilder();
+		DijkstraShortestPath<FermataSuLinea, DefaultWeightedEdge> dijkstra = findPath(p,a);		
+		GraphPath<FermataSuLinea, DefaultWeightedEdge> path = dijkstra.getPath() ;
 		
 		if (path==null)
-			return null ;
+			return null;
 		
 		List<DefaultWeightedEdge> pathEdgeList = dijkstra.getPathEdgeList();
 		double temps = path.getWeight() + (pathEdgeList.size() -1) * 0.3;
 		
-		result.append("Percorso: [ ");
-		for (DefaultWeightedEdge edge : pathEdgeList)
-			result.append(graph.getEdgeTarget(edge).getNome()+", ");
+		result.append("Percorso: \n [ ");
+		String suLinea = null;
+		
+		for (DefaultWeightedEdge edge : pathEdgeList) {
+			
+			if(graph.getEdgeTarget(edge).getLinea().getNome() != suLinea) {
+				suLinea = graph.getEdgeTarget(edge).getLinea().getNome();
+				result.append("/nCambio su Linea: " + suLinea + "/n");
+			}
+			
+			result.append(graph.getEdgeTarget(edge).getFermata().getNome()+", ");
+		}
 			
 		result.setLength(result.length()-2);
 		result.append(" ]\n Tempo di percorenza stimato : " + formatHour(temps));
@@ -66,25 +91,31 @@ public class Model {
 		return String.format("%02d:%02d:%02d",hh,mm,ss);
 	}
 	
+
+	
 	private void generaGrafo() {
 		this.linee = dao.getListLinea();
-		this.conn = dao.getListConn();
-		this.graph = new WeightedMultigraph<Fermata, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+		this.conn = dao.getListConn(fermate, linee);
+		
+		this.graph = new DirectedWeightedMultigraph<FermataSuLinea, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 
-		Graphs.addAllVertices(graph, this.fermate);
+		for(Connessione c : conn)
+			ferLinee.add(new FermataSuLinea(c.getStazP(), c.getLinea()));
 		
+		Graphs.addAllVertices(graph, ferLinee);
+
 		for(Connessione c : conn) {
-			Fermata stazA = findFermataById(c.getId_StazA());
-			Fermata stazP = findFermataById(c.getId_StazP());
+			FermataSuLinea stazA = ferLinee.get(ferLinee.indexOf(new FermataSuLinea(c.getStazA(), c.getLinea())));
+			FermataSuLinea stazP = ferLinee.get(ferLinee.indexOf(new FermataSuLinea(c.getStazP(), c.getLinea())));
 		
-			Graphs.addEdge(graph, stazA, stazP, calcTemps(stazA,stazP,c.getId_linea()));
+			Graphs.addEdge(graph, stazP, stazA, calcTemps(c.getStazP(),c.getStazA(),c.getLinea()));
 		}
 		// System.out.println(graph.toString());
 	}
 	
-	public double calcTemps(Fermata p, Fermata a, int linea) {
+	public double calcTemps(Fermata p, Fermata a, Linea linea) {
 		double s = LatLngTool.distance( new LatLng(p.getCoordX() , p.getCoordY()), new LatLng(a.getCoordX() , a.getCoordY()), LengthUnit. KILOMETER);
-		double v = findLineaById(linea).getVelocita() ;
+		double v = linea.getVelocita() ;
 		
 		double temp = (s/v)*60*60;
 		
@@ -92,30 +123,18 @@ public class Model {
 		return temp;
 	}
 	
-	public Fermata findFermataById(int id) {
-		for(Fermata f : fermate) 
-			if(f.getId_fermata() == id)
-				return f;
+
+	
+	public List<FermataSuLinea> findFermataByNome( String nome) {
+		List<FermataSuLinea> fs = new ArrayList<>();
 		
-		return null;
-				
+		for(FermataSuLinea f : ferLinee) 
+			if(f.getFermata().getNome().equals(nome))
+				fs.add(f);
+		
+		return fs;
 	}
 	
-	public Fermata findFermataByNome( String nome) {
-		for(Fermata f : fermate) 
-			if(f.getNome().equals(nome))
-				return f;
-		
-		return null;
-	}
-	
-	public Linea findLineaById(int id) {
-		for(Linea l : linee) 
-			if(l.getId_linea() == id)
-				return l;
-		
-		return null;
-	}
 	public List<String> getListNomeFermata() {
 		List<String> nome = new ArrayList<>();
 		
