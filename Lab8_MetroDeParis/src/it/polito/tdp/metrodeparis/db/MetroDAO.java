@@ -9,6 +9,7 @@ import java.util.List;
 
 import it.polito.tdp.metrodeparis.model.Connessione;
 import it.polito.tdp.metrodeparis.model.Fermata;
+import it.polito.tdp.metrodeparis.model.FermataSuLinea;
 import it.polito.tdp.metrodeparis.model.Linea;
 
 public class MetroDAO {
@@ -61,6 +62,41 @@ public class MetroDAO {
 						res.getString("nome"),
 						res.getDouble("coordX"),
 						res.getDouble("coordY")));
+			}
+			
+			st.close();
+			conn.close();
+			
+			return linee;
+		
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public List<FermataSuLinea> getListFermataSuLinea(List<Fermata> f, List<Linea> l) {
+		List<FermataSuLinea> linee = new ArrayList<FermataSuLinea>();
+		String sql = "SELECT DISTINCT fermata.id_fermata, linea.id_linea "
+				+ "FROM fermata, linea, connessione "
+				+ "WHERE (fermata.id_fermata = connessione.id_stazP OR fermata.id_fermata = connessione.id_stazA) "
+				+ "AND connessione.id_linea = linea.id_linea ";
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			Statement st = conn.createStatement();
+			
+			ResultSet res = st.executeQuery(sql);
+			
+			while(res.next()) {
+				
+				Fermata fermata = f.get(f.indexOf(new Fermata(res.getInt("id_fermata"))));
+				Linea linea = l.get(l.indexOf(new Linea(res.getInt("id_linea"))));
+				
+				linee.add(new FermataSuLinea (fermata, linea));
+				
 			}
 			
 			st.close();

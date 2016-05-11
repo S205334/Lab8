@@ -16,6 +16,15 @@ public class Linea {
 		this.intervallo = intervallo;
 		this.colore = colore;
 	}
+	
+	
+
+	@Override
+	public String toString() {
+		return " " + nome;
+	}
+
+
 
 	public Linea(int id_linea) {
 		this.id_linea = id_linea;

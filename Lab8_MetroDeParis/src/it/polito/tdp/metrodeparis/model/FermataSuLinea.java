@@ -1,46 +1,33 @@
 package it.polito.tdp.metrodeparis.model;
 
-public class FermataSuLinea {
+public class FermataSuLinea extends Fermata {
 	
-	private Fermata fermata;
 	private Linea linea;
-	
-	public FermataSuLinea(Fermata fermata, Linea linee) {
-		super();
-		this.fermata = fermata;
-		this.linea = linee;
+
+	public FermataSuLinea(int id_fermata, String nome, double coordX, double coordY, Linea linea) {
+		super(id_fermata, nome, coordX, coordY);
+		this.linea = linea;
+	}
+
+	public FermataSuLinea(Fermata fermata, Linea linea) {
+		super(fermata.getId_fermata(), fermata.getNome(), fermata.getCoordX(), fermata.getCoordY());
+		this.linea = linea;
 	}
 	
-	public FermataSuLinea(Fermata fermata) {
-		this.fermata = fermata;
-	}
-	
-
-	public Fermata getFermata() {
-		return fermata;
-	}
-
-
-	public void setFermata(Fermata fermata) {
-		this.fermata = fermata;
-	}
-
-
 	public Linea getLinea() {
 		return linea;
 	}
 
-
 	public void setLinea(Linea linea) {
 		this.linea = linea;
 	}
-
+	
+	
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fermata == null) ? 0 : fermata.hashCode());
+		int result = super.hashCode();
 		result = prime * result + ((linea == null) ? 0 : linea.hashCode());
 		return result;
 	}
@@ -49,16 +36,11 @@ public class FermataSuLinea {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		FermataSuLinea other = (FermataSuLinea) obj;
-		if (fermata == null) {
-			if (other.fermata != null)
-				return false;
-		} else if (!fermata.equals(other.fermata))
-			return false;
 		if (linea == null) {
 			if (other.linea != null)
 				return false;
@@ -66,6 +48,10 @@ public class FermataSuLinea {
 			return false;
 		return true;
 	}
+
+
+	
+	
 	
 	
 }

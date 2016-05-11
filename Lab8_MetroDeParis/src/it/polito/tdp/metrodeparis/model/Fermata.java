@@ -1,11 +1,15 @@
 package it.polito.tdp.metrodeparis.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Fermata {
 	
 	private int id_fermata;
 	private String nome;
 	private double coordX;
 	private double coordY;
+	private List<FermataSuLinea> fermateSuLinea;
 	
 	public Fermata(int id_fermata, String nome, double coordX, double coordY) {
 		super();
@@ -13,6 +17,7 @@ public class Fermata {
 		this.nome = nome;
 		this.coordX = coordX;
 		this.coordY = coordY;
+		this.fermateSuLinea = new ArrayList<FermataSuLinea>();
 	}
 	
 	public Fermata(int id_fermata) {
@@ -51,12 +56,22 @@ public class Fermata {
 		this.coordY = coordY;
 	}
 
+	public List<FermataSuLinea> getFermateSuLinea() {
+		return this.fermateSuLinea;
+	}
+
+	public void addFermataSuLinea(FermataSuLinea fermataSuLinea) {
+		this.fermateSuLinea.add(fermataSuLinea);
+	}
+	
+	@Override
+	public String toString() {
+		return nome;
+	}
+	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + id_fermata;
-		return result;
+		return ((Integer) id_fermata).hashCode();
 	}
 
 	@Override
